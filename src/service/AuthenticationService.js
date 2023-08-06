@@ -13,6 +13,17 @@ let login=(body)=>{
 }
 
 
+let logout = (token) => {
+  return axios.post(BASE_URL + "/logout", {}, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+}
+
+
 export{
-  login
+  login,
+  logout
+
 }

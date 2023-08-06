@@ -1,13 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import "../css/Authentication/Login.css";
 import { login } from "../../service/AuthenticationService.js";
 import { useNavigate } from "react-router-dom";
+import { LoginContext } from "../../utils/LoginContext";
+
 
 function Login() {
+  const { setIsLoggedIn } = useContext(LoginContext);
   const navigate = useNavigate();
-  let [email, setEmail] = useState("");
 
+  let [email, setEmail] = useState("");
   let [password, setPassword] = useState("");
+
   let handleLogin = (e) => {
     e.preventDefault();
     //console.log("Email " + email, "Password: " + password);
@@ -16,15 +20,18 @@ function Login() {
     } else {
       let userObject = {
         email: email,
-        password: password
-      }
-  
+        password: password,
+      };
+
       login(userObject)
         .then((res) => {
           if (res.status === 200) {
-         //   console.log(res.data.user);
-            localStorage.setItem('user', JSON.stringify(res.data.user))
-            localStorage.setItem('token', res.data.token)
+            //console.log(res.data.user);
+            localStorage.setItem("user", JSON.stringify(res.data.user));
+            localStorage.setItem("token", res.data.token);
+            localStorage.setItem("isLoggedIn", true);
+            setIsLoggedIn(true); // Set the isLoggedIn value to true
+
             navigate("/home");
           } else {
             alert("Login Failed. Please check your email and password.");
@@ -42,12 +49,14 @@ function Login() {
             alert("Network Error. Please check your internet connection.");
           } else {
             // Something happened in setting up the request that triggered an Error
+            console.log(err);
             alert("An error occurred while logging in. Please try again later.");
           }
           console.log(err);
         });
     }
   };
+
 
   return (
     <div className="relative flex flex-col justify-center min-h-screen overflow-hidden">

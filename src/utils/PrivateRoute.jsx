@@ -1,41 +1,33 @@
-import {Outlet,Navigate} from 'react-router-dom'
-import axios from 'axios'
-import React, { useEffect,useState } from 'react'
+import { Outlet, Navigate } from 'react-router-dom';
+import React, { useEffect, useState, useContext } from 'react';
+import { LoginContext } from './LoginContext';
+import axios from 'axios';
 
 function PrivateRoute() {
+  const { isLoggedIn } = useContext(LoginContext);
+  const [isTokenValid, setTokenValid] = useState(false); // Initialize with false
 
-let [isValid,setIsValid]=useState(0)
-useEffect(() => {
-    const url = 'http://localhost:8080/api/v1/auth/istokenvalid/';
-    const token = localStorage.getItem('token');
+  const url = 'http://localhost:8080/api/v1/auth/istokenvalid/';
+  let token = localStorage.getItem('token');
 
-    if (token) {
+  useEffect(() => {
+    // Call only if the user is logged in and token exists
+      axios.get(url + token)
+        .then((data) => {
+          console.log("Data: ", data.data);
+          setTokenValid(data.data); // Update the state with the value from data.data
+        })
+        .catch(error => {
+          console.log("Error: ", error);
+          setTokenValid(false); // Set as false on error
+        });
+  }, [isLoggedIn, token]); // Dependency array
 
-      try {
-        axios
-          .get(url + token)
-          .then((res) => {
-             // console.log(res)
-              if(res.data===true)
-                 setIsValid(prev=>1)
-                 console.log(isValid)
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      } catch (err) {
-        console.log(err);
-      }
-    } 
-  }, [isValid]);
-
-
-  if(isValid){
-    return <Outlet/>
-  }
-  else{
-    <Navigate to='/'/>
+  if (isLoggedIn ) { // Check both isLoggedIn and isTokenValid
+    return <Outlet/>;
+  } else {
+    return <Navigate to="/" />;
   }
 }
 
-export default PrivateRoute
+export default PrivateRoute;
